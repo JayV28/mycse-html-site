@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Civil Service Practice Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl">
+        <div id="introContainer" class="mb-4">
+            <h1 class="text-2xl font-bold text-center mb-4">Welcome to Civil Service Practice Test</h1>
+            <p class="text-gray-600 mb-4">This practice test is designed to help you prepare for the Civil Service board examination. The test consists of multiple-choice questions covering key concepts. Select your preferred test duration and test topic below, then click "Start Test" to begin.</p>
+            <div class="mb-4">
+                <label for="testDuration" class="font-semibold">Set Test Duration (minutes):</label>
+                <input type="number" id="testDuration" value="30" min="10" max="180" class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mt-2">
+            </div>
+            <div class="mb-4">
+                <label for="testTopic" class="font-semibold">Select Test Topic:</label>
+                <select id="testTopic" class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mt-2">
+                    <option value="Test 1">Test 1: Antonym & Synonym (Questions 1–15)</option>
+                    <option value="Test 2">Test 2: Grammar (Questions 16–30)</option>
+                    <option value="Test 3">Test 3: Error Identification (Questions 31–39)</option>
+                    <option value="Test 4">Test 4: Subject-Verb Agreement (Questions 40–49)</option>
+                    <option value="Test 5">Test 5: Subject-Verb Agreement (Questions 50–60)</option>
+                </select>
+            </div>
+            <button onclick="startTest()" class="mt-2 w-full bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600">Start Test</button>
+        </div>
+        <div id="testContainer" class="hidden">
+            <h1 class="text-2xl font-bold text-center mb-4">Civil Service Practice Test</h1>
+            <div class="flex justify-between mb-4">
+                <div>
+                    <span class="font-semibold">Time Left: </span>
+                    <span id="timer" class="text-red-500">30:00</span>
+                </div>
+                <div>
+                    <span class="font-semibold">Question: </span>
+                    <span id="questionNumber">1</span>/<span id="totalQuestions"></span>
+                </div>
+            </div>
+            <div id="questionContainer" class="mb-4">
+                <p id="questionText" class="font-semibold mb-2"></p>
+                <div id="optionsContainer" class="space-y-2"></div>
+            </div>
+            <div class="flex justify-between">
+                <button id="prevBtn" onclick="prevQuestion()" class="bg-gray-300 text-gray-700 p-2 rounded-lg hover:bg-gray-400 disabled:opacity-50" disabled>Previous</button>
+                <button id="nextBtn" onclick="nextQuestion()" class="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600">Next</button>
+                <button id="submitBtn" onclick="submitTest()" class="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600 hidden">Submit Test</button>
+            </div>
+            <div id="resultContainer" class="mt-4 hidden">
+                <h2 class="text-xl font-bold">Test Results</h2>
+                <p id="scoreText" class="mb-4"></p>
+                <p id="feedbackText" class="mb-4"></p>
+                <h3 class="text-lg font-semibold mb-2">Answer Key</h3>
+                <div id="answerKey" class="space-y-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // All questions
+        const allQuestions = [
+            {
+                question: "The first person writes a brilliant paper in <span style='color:red'>immaculate</span> prose. Which of the following meanings best fits the highlighted word?",
+                options: ["long", "prestige", "irreversible", "modern idea", "spotlessly clean"],
+                correctAnswer: "spotlessly clean"
+            },
+            {
+                question: "The northern half of the island is a mountain range covered with jungle, to which a <span style='color:red'>perilous</span> beach road nervously clings. Which of the following meanings best fits the highlighted word?",
+                options: ["lengthy path", "narrow and steep", "vibrant atmosphere", "full of danger or risk", "bumpy with uncomfortable experience"],
+                correctAnswer: "full of danger or risk"
+            },
+            {
+                question: "The diplomat's <span style='color:red'>conciliatory</span> tone helped ease the tension during the heated negotiations. Which of the following meanings best fits the highlighted word?",
+                options: ["aggressive and confrontational", "indifferent and dismissive", "soothing and peace-making", "impatient and hostile", "interested and energized"],
+                correctAnswer: "soothing and peace-making"
+            },
+            {
+                question: "His <span style='color:red'>audacious</span> decision to climb the treacherous mountain alone earned him both admiration and criticism. Which of the following meanings best fits the highlighted word?",
+                options: ["cautious and unadventurous", "reckless and daring", "ordinary and practical", "thoughtful and reserved", "respectful and cautious"],
+                correctAnswer: "reckless and daring"
+            },
+            {
+                question: "Her <span style='color:red'>reticent</span> nature made it difficult for others to understand her true feelings. Which of the following meanings best fits the highlighted word?",
+                options: ["outspoken and expressive", "shy and reserved", "eager and enthusiastic", "aggressive and confrontational", "indifferent and aloof"],
+                correctAnswer: "shy and reserved"
+            },
+            {
+                question: "We naturally <span style='color:red'>commiserate</span> with people who have suffered bereavement. Which of the following meanings best fits the highlighted word?",
+                options: ["praise", "scold", "stagnate", "sympathize", "incoherent"],
+                correctAnswer: "sympathize"
+            },
+            {
+                question: "The scientist's hypothesis was met with <span style='color:red'>skepticism</span> by her colleagues, who were unconvinced by the preliminary evidence. Which of the following meanings best fits the highlighted word?",
+                options: ["disbelief", "admiration", "enthusiasm", "agreement", "indifference"],
+                correctAnswer: "disbelief"
+            },
+            {
+                question: "Many leaders of the past and present, in countries around the world, have been accused of <span style='color:red'>demagoguery</span>. Which of the following meanings best fits the highlighted word?",
+                options: ["pertaining to charitable activities", "graft and corruption", "one who ferments political discontent", "to engage in extramarital sex", "manipulating public opinion through emotional appeal"],
+                correctAnswer: "manipulating public opinion through emotional appeal"
+            },
+            {
+                question: "The senator's <span style='color:red'>rhetoric</span> was so compelling that it stirred the emotions of the crowd and persuaded many to take action. Which of the following meanings best fits the highlighted word?",
+                options: ["simple conversation", "relevant facts", "scientific data", "persuasive speech", "casual remarks"],
+                correctAnswer: "persuasive speech"
+            },
+            {
+                question: "Who is the speaker <span style='color:red'>pro tempore</span> of the Senate? Which of the following meanings best fits the highlighted word?",
+                options: ["leader", "official", "assistant", "temporary", "representative"],
+                correctAnswer: "temporary"
+            },
+            {
+                question: "A clause may protect you or it may <span style='color:red'>abridge</span> your rights. Which of the following words is the antonym of the underlined word?",
+                options: ["shorten", "expand", "elaborate", "induce", "summarize"],
+                correctAnswer: "expand"
+            },
+            {
+                question: "The manager's decision to <span style='color:red'>mitigate</span> the problem helped resolve the issue quickly. Which of the following words is the antonym of the underlined word?",
+                options: ["alleviate", "exacerbate", "clarify", "neutralize", "simplify"],
+                correctAnswer: "exacerbate"
+            },
+            {
+                question: "The artist's work was praised for its <span style='color:red'>vivid</span> portrayal of nature. Which of the following words is the antonym of the underlined word?",
+                options: ["dull", "vibrant", "colorful", "detailed", "lively"],
+                correctAnswer: "dull"
+            },
+            {
+                question: "The lawyer's argument was so <span style='color:red'>perspicuous</span> that even the layperson in the courtroom could follow it. Which of the following words is the synonym of the underlined word?",
+                options: ["clear", "obscure", "political", "cryptic", "educational"],
+                correctAnswer: "clear"
+            },
+            {
+                question: "The scientist's <span style='color:red'>sesquipedalian</span> speech left the audience bewildered, as few could comprehend the complex terminology. Which of the following words is the synonym of the underlined word?",
+                options: ["concise", "simplistic", "long-winded", "straightforward", "practical"],
+                correctAnswer: "long-winded"
+            },
+            {
+                question: "Neither of the boys ___ completed their assignment.",
+                options: ["have", "has", "were", "done", "does"],
+                correctAnswer: "has"
+            },
+            {
+                question: "Over fatigue caused many Filipino workers to ________, especially during overtime.",
+                options: ["bring out", "blow over", "break up", "break down", "break from"],
+                correctAnswer: "break down"
+            },
+            {
+                question: "The committee members were divided on the issue, ___ they all agreed on the need for change.",
+                options: ["however", "although", "even though", "unless", "so"],
+                correctAnswer: "however"
+            },
+            {
+                question: "The yoga coach advises ____ heavy meals before yoga class.",
+                options: ["avoid", "avoids", "avoided", "avoiding", "to avoid"],
+                correctAnswer: "avoiding"
+            },
+            {
+                question: "In this regard, we would like to request your valuable permission ____ the subjected open spaces as per the Deed of Donation in order to execute our stated project proposal.",
+                options: ["to temporary use", "with temporary use", "for temporary uses", "to temporarily use", "for temporarily used"],
+                correctAnswer: "to temporarily use"
+            },
+            {
+                question: "By next year, I _____ my degree.",
+                options: ["will finish", "will be finishing", "will had finished", "will have finished", "would have been finished"],
+                correctAnswer: "will have finished"
+            },
+            {
+                question: "Jack works at a cafe __ high-speed internet is provided free of charge.",
+                options: ["that", "what", "were", "which", "where"],
+                correctAnswer: "where"
+            },
+            {
+                question: "If she _____ earlier, she _____ the bus.",
+                options: ["had left --- would catch", "left --- would have caught", "had left --- would have caught", "leaves --- would have caught", "would have left --- caught"],
+                correctAnswer: "had left --- would have caught"
+            },
+            {
+                question: "This is the driver _________, I _________ found the treasure.",
+                options: ["who --- believe", "whose --- believes", "whom --- believe", "which --- believed", "that --- have believed"],
+                correctAnswer: "who --- believe"
+            },
+            {
+                question: "By the time you get to the station, the train ____",
+                options: ["will have left", "has left", "will leave", "is leaving", "leaves"],
+                correctAnswer: "will have left"
+            },
+            {
+                question: "Ang balita tungkol sa pagkawala ng kanilang mahal sa buhay ay nagdulot ng _____ sa buong pamilya.",
+                options: ["hilakbot", "hagalhal", "hagayhay", "handulong", "haraya"],
+                correctAnswer: "hilakbot"
+            },
+            {
+                question: "Ibinuhos niya ang langis sa _____ ng kanyang bisikleta upang mapanatili itong maayos.",
+                options: ["tangab", "tanikala", "tandayan", "tangkulok", "talainggugol"],
+                correctAnswer: "tanikala"
+            },
+            {
+                question: "The retired judge agreed to _____ the wedding, bringing a sense of solemnity and formality to the ceremony.",
+                options: ["mishap", "obtrude", "officiate", "maladroit", "munificent"],
+                correctAnswer: "officiate"
+            },
+            {
+                question: "The new evidence presented in court was so compelling that it effectively _________ the defendant's earlier claims of innocence.",
+                options: ["negated", "obtruded", "mandated", "juxtaposed", "placated"],
+                correctAnswer: "negated"
+            },
+            {
+                question: "Our contestant ____ for the highest title. She had ____ hard to attain it.",
+                options: ["vied ........... striven", "placated ............. conciliated", "arbitrated ........... adjudicated", "subsided ........... driven", "indignant.. ......... elevated"],
+                correctAnswer: "vied ........... striven"
+            },
+            {
+                question: "The <span style='color:red'>real estate agent (A)</span> <span style='color:red'>will (B)</span> <span style='color:red'>apprise (C)</span> the value of the house before listing it <span style='color:red'>for sale.(D)</span> <span style='color:red'>NO ERROR (E)</span>",
+                options: ["real estate agent", "will", "apprise", "for sale.", "NO ERROR"],
+                correctAnswer: "apprise"
+            },
+            {
+                question: "The committee, after <span style='color:red'>reviewing (A)</span> all the applications thoroughly, <span style='color:red'>made (B)</span> <span style='color:red'>their (C)</span> <span style='color:red'>decision and announced (D)</span> the winner with great enthusiasm. <span style='color:red'>NO ERROR (E)</span>",
+                options: ["reviewing", "made", "their", "decision and announced", "NO ERROR"],
+                correctAnswer: "their"
+            },
+            {
+                question: "I suggest that he <span style='color:red'>stays (A)</span> in the room <span style='color:red'>for (B)</span> one week <span style='color:red'>to complete (C)</span> his research without <span style='color:red'>distractions (D)</span> <span style='color:red'>NO ERROR (E)</span>",
+                options: ["stays", "for", "to complete", "distractions", "NO ERROR"],
+                correctAnswer: "stays"
+            },
+            {
+                question: "President Marcos, with the cabinet members, <span style='color:red'>comes (A)</span> <span style='color:red'>into the hall (B)</span> <span style='color:red'>to address the nation (C)</span> and outline the new economic reforms that will <span style='color:red'>take effect (D)</span> next month. <span style='color:red'>NO ERROR (E)</span>",
+                options: ["comes", "into the hall", "to address the nation", "take effect", "NO ERROR"],
+                correctAnswer: "NO ERROR"
+            },
+            {
+                question: "A number of board members <span style='color:red'>was (A)</span> absent, <span style='color:red'>which delayed (B)</span> the <span style='color:red'>decision-making (C)</span> process and <span style='color:red'>pushed (D)</span> the meeting agenda to the next session. <span style='color:red'>NO ERROR (E)</span>",
+                options: ["was", "which delayed", "decision-making", "pushed", "NO ERROR"],
+                correctAnswer: "was"
+            },
+            {
+                question: "She <span style='color:red'>enjoys (A)</span> <span style='color:red'>hiking, (B)</span> swimming, and <span style='color:red'>to ride (C)</span> her bike in the park <span style='color:red'>every weekend. (D)</span> <span style='color:red'>NO ERROR (E)</span>",
+                options: ["enjoys", "hiking,", "to ride", "every weekend", "NO ERROR"],
+                coldrectAnswer: "to ride"
+            },
+            {
+                question: "The <span style='color:red'>acoustics (A)</span> in the auditorium <span style='color:red'>were (B)</span> so poor that we <span style='color:red'>couldn't (C)</span> hardly <span style='color:red'>hear (D)</span> a word of the address. <span style='color:red'>NO ERROR (E)</span>",
+                options: ["acoustics", "were", "couldn't", "hear", "NO ERROR"],
+                correctAnswer: "couldn't"
+            },
+            {
+                question: "<span style='color:red'>I'll come to you (A)</span> <span style='color:red'>for advise (B)</span> <span style='color:red'>whenever (C)</span> <span style='color:red'>I need it. (D)</span> <span style='color:red'>NO ERROR (E)</span>",
+                options: ["I'll come to you", "for advise", "whenever", "I need it.", "NO ERROR"],
+                correctAnswer: "for advise"
+            },
+            {
+                question: "The <span style='color:red'>national library (A)</span> of the Philippines <span style='color:red'>is (B)</span> the Philippines' official <span style='color:red'>repository (C)</span> of information on cultural heritage and other literary <span style='color:red'>resources. (D)</span> <span style='color:red'>NO ERROR (E)</span>",
+                options: ["national library", "is", "repository", "resources", "NO ERROR"],
+                correctAnswer: "national library"
+            },
+            {
+                question: "<span style='color:red'>Out of all the vacations I've taken, (A)</span> <span style='color:red'>this trip to the mountains was (B)</span> <span style='color:red'>more unforgettable, (C)</span> with breathtaking views, <span style='color:red'>incredible hiking trails, (D)</span> and the most amazing sunsets I've ever seen. <span style='color:red'>NO ERROR (E)</span>",
+                options: ["Out of all the vacations I've taken", "this trip to the mountains was", "more unforgettable", "incredible hiking trails", "NO ERROR"],
+                correctAnswer: "more unforgettable"
+            },
+            {
+                question: "Which sentence demonstrates correct subject-verb agreement?",
+                options: [
+                    "The candidate leave the building, along with her supporters.",
+                    "The candidate and her supporters leaves the building.",
+                    "Either the candidate or the supporters leaves the building.",
+                    "Neither the candidate nor the supporters leaves the building.",
+                    "The candidate, along with her supporters, leaves the building."
+                ],
+                correctAnswer: "The candidate, along with her supporters, leaves the building."
+            },
+            {
+                question: "Which sentence uses correct subject-verb agreement?",
+                options: [
+                    "You must practiced spoke English.",
+                    "You must practiced spoken English.",
+                    "You must practice to speak English.",
+                    "You must practice speaking English.",
+                    "You must practices speaking English."
+                ],
+                correctAnswer: "You must practice speaking English."
+            },
+            {
+                question: "Which sentence uses correct subject-verb agreement?",
+                options: [
+                    "I didn't know that classical music appeal to you.",
+                    "I didn't know that you appealed to classical music.",
+                    "I didn't know that classical music appealed to you.",
+                    "I didn't know that classical music is appealing to you.",
+                    "I didn't know that you, had appealed to classical music."
+                ],
+                correctAnswer: "I didn't know that classical music appealed to you."
+            },
+            {
+                question: "Which sentence uses correct subject-verb agreement?",
+                options: [
+                    "Running late, the bus was missed by Sarah.",
+                    "After finishing the book, the movie was watched by him.",
+                    "Having studied all night, the exam was easy for her.",
+                    "Not knowing the answer, the question was skipped by me.",
+                    "After studying all night, she found the exam easy."
+                ],
+                correctAnswer: "After studying all night, she found the exam easy."
+            },
+            {
+                question: "Which sentence uses correct subject-verb agreement?",
+                options: [
+                    "I always answer your letters as soon as I can, being very busy with work.",
+                    "I always answer to your letters as soon as I can, being very busy with work.",
+                    "I always answer your letters as soon as I can, even though I am very busy with work.",
+                    "I always answer to your letters as soon as I can, even though I am very busy with work.",
+                    "I always answer to all of your letters as soon as I can, even though I am very busy with work."
+                ],
+                correctAnswer: "I always answer your letters as soon as I can, even though I am very busy with work."
+            },
+            {
+                question: "Which sentence uses correct subject-verb agreement?",
+                options: [
+                    "Running late for an important meeting, the meeting started without me, and I had to apologize to my boss for being late.",
+                    "Running late for an appointment, the bus passed by without stopping, causing me to miss my scheduled meeting.",
+                    "Running late for work, my car broke down on the highway, and I had to call a tow truck to get it repaired.",
+                    "Running late for my doctor's appointment, I missed the bus, which made me even later, so I had to reschedule.",
+                    "Running late for a flight, the alarm clock woke me up late, and I barely had time to pack my bags and leave the house."
+                ],
+                correctAnswer: "Running late for my doctor's appointment, I missed the bus, which made me even later, so I had to reschedule."
+            },
+            {
+                question: "Which sentence uses correct subject-verb agreement?",
+                options: [
+                    "Studying for the final exams all night, the notes I reviewed seemed unclear and confusing the next day.",
+                    "Studying for the final exams all night, I found the notes I reviewed seemed unclear and confusing the next day.",
+                    "Studying for the final exams all night, the coffee I drank helped keep me awake, but I was exhausted.",
+                    "Studying for the final exams all night, I struggled to keep my eyes open and focus on the material the next morning.",
+                    "Studying for the final exams all night, the textbook appeared much harder to understand the next day."
+                ],
+                correctAnswer: "Studying for the final exams all night, I struggled to keep my eyes open and focus on the material the next morning."
+            },
+            {
+                question: "Which sentence uses correct subject-verb agreement?",
+                options: [
+                    "It was hard for the heavy-weight boxer to knock down the feather-weight champion.",
+                    "It was hard for the heavy-weight boxer to knockdown the feather-weight champion.",
+                    "It was hard for the heavy-weight boxer to knock-down the feather-weight champion.",
+                    "It was hard for the heavy-weight boxer to down knock the feather-weight champion.",
+                    "It was hard for the heavy-weight boxer to down knock the feather-weight champion."
+                ],
+                correctAnswer: "It was hard for the heavy-weight boxer to knock down the feather-weight champion."
+            },
+            {
+                question: "Which sentence uses correct subject-verb agreement?",
+                options: [
+                    "The captured prisoner was threatened, slapped, and beaten up with a cane.",
+                    "The captured prisoner was slapped, threatened, and beaten up with a cane.",
+                    "The captured prisoner was beaten up by a cane, slapped, and threatened.",
+                    "The captured prisoner was beaten up by a cane, threatened, and slapped.",
+                    "The captured prisoner was beaten-up by a cane, slapped, and threatened."
+                ],
+                correctAnswer: "The captured prisoner was slapped, threatened, and beaten up with a cane."
+            },
+            {
+                question: "Which sentence uses correct subject-verb agreement?",
+                options: [
+                    "After finishing the report, the computer crashed, and I had to restart it.",
+                    "After finishing the report, I noticed the computer crashed, and I had to restart it.",
+                    "After finishing the report, the email was sent, and I checked my inbox for replies.",
+                    "After finishing the report, the email sent automatically, and I checked my inbox for replies.",
+                    "After finishing the report, my email account had been accessed by someone else."
+                ],
+                correctAnswer: "After finishing the report, the email was sent, and I checked my inbox for replies."
+            },
+            {
+                question: "Arrange the following sentences in the correct logical order: <ul class='list-disc ml-6 mb-2'><li>I. Exercise is essential for maintaining good health.</li><li>II. Regular physical activity helps improve cardiovascular health and boosts energy levels.</li><li>III. For instance, going for a daily run can increase stamina and reduce stress.</li><li>IV. In addition, it also promotes better sleep and helps in weight management.</li></ul>",
+                options: [
+                    "I-IV-II-III",
+                    "I-II-III-IV",
+                    "II-I-IV-II",
+                    "I-III-II-IV",
+                    "I-I-III-IV"
+                ],
+                correctAnswer: "I-II-III-IV"
+            },
+            {
+                question: "Arrange the following sentences in the correct logical order: <ul class='list-disc ml-6 mb-2'><li>I. The fiesta, known as 'Wattah Wattah', in San Juan City holds religious significance centered around St. Joseph the Baptist.</li><li>II. It involves the dousing of water, symbolizing purification and renewal, in homage to the saint known for baptizing Jesus in the Jordan River.</li><li>III. This tradition merges festive joy with spiritual reflection, emphasizing community solidarity and faith.</li><li>IV. Participants engage in the joyful splashing of water to commemorate St. Joseph's feast day, fostering a deep sense of cultural identity and religious devotion among residents and visitors alike.</li></ul>",
+                options: [
+                    "I-III-II-IV",
+                    "I-II-III-IV",
+                    "II-I-IV-III",
+                    "IV-II-III-I",
+                    "II-III-I-IV"
+                ],
+                correctAnswer: "I-II-III-IV"
+            }
+            
+        ];
+
+        // Test configuration
+        const tests = [
+            { name: "Test 1", startIndex: 0, endIndex: 14 }, // Questions 1–15
+            { name: "Test 2", startIndex: 15, endIndex: 29 }, // Questions 16–30
+            { name: "Test 3", startIndex: 30, endIndex: 39 }, // Questions 31–39
+            { name: "Test 4", startIndex: 40, endIndex: 49 }, // Questions 40–49
+            { name: "Test 5", startIndex: 50, endIndex: 51 } // Questions 50–60
+        ];
+
+        let questions = [];
+        let currentQuestion = 0;
+        let score = 0;
+        let userAnswers = [];
+        let timeLeft = 30 * 60; // Default 30 minutes in seconds
+        let timerInterval;
+
+        // Initialize total questions based on selected test
+        function updateTotalQuestions() {
+            const selectedTest = document.getElementById('testTopic').value;
+            const testConfig = tests.find(test => test.name === selectedTest);
+            const total = testConfig.endIndex - testConfig.startIndex + 1;
+            document.getElementById('totalQuestions').textContent = total > 0 ? total : '0';
+        }
+
+        // Start test with user-defined duration and selected topic
+        function startTest() {
+            const durationInput = document.getElementById('testDuration').value;
+            const duration = parseInt(durationInput);
+            if (isNaN(duration) || duration < 10 || duration > 180) {
+                alert("Please enter a duration between 10 and 180 minutes.");
+                return;
+            }
+            const selectedTest = document.getElementById('testTopic').value;
+            const testConfig = tests.find(test => test.name === selectedTest);
+            questions = allQuestions.slice(testConfig.startIndex, testConfig.endIndex + 1).filter(q => q.question.trim() !== '');
+            if (questions.length === 0) {
+                alert("No valid questions available for this test. Please select another test.");
+                return;
+            }
+            userAnswers = new Array(questions.length).fill(null);
+            timeLeft = duration * 60;
+            currentQuestion = 0;
+            document.getElementById('introContainer').classList.add('hidden');
+            document.getElementById('testContainer').classList.remove('hidden');
+            document.getElementById('totalQuestions').textContent = questions.length;
+            loadQuestion();
+            startTimer();
+        }
+
+        // Start timer
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                document.getElementById('timer').textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    submitTest();
+                }
+            }, 1000);
+        }
+
+        // Load question
+        function loadQuestion() {
+            const q = questions[currentQuestion];
+            document.getElementById('questionText').innerHTML = q.question || "Question text missing"; // Fallback for empty questions
+            document.getElementById('questionNumber').textContent = currentQuestion + 1;
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            q.options.forEach((option, index) => {
+                const div = document.createElement('div');
+                div.innerHTML = `
+                    <input type="radio" name="option" id="option${index}" value="${option}" class="mr-2">
+                    <label for="option${index}">${String.fromCharCode(65 + index)}. ${option}</label>
+                `;
+                optionsContainer.appendChild(div);
+            });
+
+            // Restore previous answer if exists
+            if (userAnswers[currentQuestion]) {
+                document.querySelector(`input[value="${userAnswers[currentQuestion]}"]`).checked = true;
+            }
+
+            // Update button states
+            document.getElementById('prevBtn').disabled = currentQuestion === 0;
+            document.getElementById('nextBtn').classList.toggle('hidden', currentQuestion === questions.length - 1);
+            document.getElementById('submitBtn').classList.toggle('hidden', currentQuestion !== questions.length - 1);
+        }
+
+        // Navigate to previous question
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                saveAnswer();
+                currentQuestion--;
+                loadQuestion();
+            }
+        }
+
+        // Navigate to next question
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                saveAnswer();
+                currentQuestion++;
+                loadQuestion();
+            }
+        }
+
+        // Save user's answer
+        function saveAnswer() {
+            const selectedOption = document.querySelector('input[name="option"]:checked');
+            if (selectedOption) {
+                userAnswers[currentQuestion] = selectedOption.value;
+            }
+        }
+
+        // Submit test and show results
+        function submitTest() {
+            saveAnswer();
+            clearInterval(timerInterval); // Stop the timer
+            score = 0;
+            userAnswers.forEach((answer, index) => {
+                if (answer && answer.trim() === questions[index].correctAnswer.trim()) {
+                    score++;
+                }
+            });
+
+            const resultContainer = document.getElementById('resultContainer');
+            resultContainer.classList.remove('hidden');
+            document.getElementById('questionContainer').classList.add('hidden');
+            document.getElementById('prevBtn').classList.add('hidden');
+            document.getElementById('nextBtn').classList.add('hidden');
+            document.getElementById('submitBtn').classList.add('hidden');
+
+            const percentage = questions.length > 0 ? (score / questions.length) * 100 : 0;
+            document.getElementById('scoreText').textContent = `Your Score: ${score} out of ${questions.length} (${percentage.toFixed(2)}%)`;
+            document.getElementById('feedbackText').textContent = percentage >= 60
+                ? "Great job! You passed the Civil Service practice test."
+                : "Keep practicing! Review Civil Service concepts and try again.";
+
+            // Display answer key
+            const answerKeyContainer = document.getElementById('answerKey');
+            answerKeyContainer.innerHTML = '';
+            questions.forEach((q, index) => {
+                const div = document.createElement('div');
+                div.className = 'border-b pb-2 mb-2';
+                const userAnswer = userAnswers[index] || 'Not answered';
+                const isCorrect = userAnswer !== 'Not answered' && userAnswer.trim() === q.correctAnswer.trim();
+                const optionLetter = q.options.indexOf(userAnswer) >= 0 ? String.fromCharCode(65 + q.options.indexOf(userAnswer)) : '';
+                const correctIndex = q.options.indexOf(q.correctAnswer);
+                const correctLetter = correctIndex >= 0 ? String.fromCharCode(65 + correctIndex) : 'N/A';
+                div.innerHTML = `
+                    <p class="font-semibold">Question ${index + 1}: ${q.question || 'Question text missing'}</p>
+                    <p class="${isCorrect ? 'text-green-600' : 'text-red-600'}">
+                        Your Answer: ${userAnswer === 'Not answered' ? 'Not answered' : `${optionLetter}. ${userAnswer}`}
+                    </p>
+                    ${!isCorrect ? `<p class="text-green-600">Correct Answer: ${correctLetter}. ${q.correctAnswer}</p>` : ''}
+                `;
+                answerKeyContainer.appendChild(div);
+            });
+        }
+
+        // Initialize test
+        updateTotalQuestions();
+        document.getElementById('testTopic').addEventListener('change', updateTotalQuestions);
+    </script>
+</body>
+</html>
